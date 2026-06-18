@@ -1,6 +1,4 @@
-package ru.phoenix;
-
-import ru.phoenix.task1.ChainedHashMap;
+package ru.phoenix.task1;
 
 public class App {
 
