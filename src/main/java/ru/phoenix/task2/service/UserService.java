@@ -11,7 +11,11 @@ public class UserService {
     private final UserDao userDao;
 
     public UserService() {
-        this.userDao = new UserDaoImpl();
+        this(new UserDaoImpl());
+    }
+
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     public void createUser(String name,

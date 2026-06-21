@@ -24,6 +24,32 @@ public final class HibernateUtil {
         return SESSION_FACTORY;
     }
 
+    public static SessionFactory buildSessionFactory(
+            String url,
+            String username,
+            String password) {
+
+        return new Configuration()
+                .configure()
+                .setProperty(
+                        "hibernate.connection.url",
+                        url
+                )
+                .setProperty(
+                        "hibernate.connection.username",
+                        username
+                )
+                .setProperty(
+                        "hibernate.connection.password",
+                        password
+                )
+                .setProperty(
+                        "hibernate.hbm2ddl.auto",
+                        "create-drop"
+                )
+                .buildSessionFactory();
+    }
+
     public static void shutdown() {
         SESSION_FACTORY.close();
     }
