@@ -1,6 +1,7 @@
 package ru.phoenix.task2.dao;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import ru.phoenix.task2.entity.User;
 import ru.phoenix.task2.exception.DataBaseException;
@@ -10,13 +11,23 @@ import java.util.List;
 
 public class UserDaoImpl implements UserDao {
 
+    private final SessionFactory sessionFactory;
+
+    public UserDaoImpl() {
+        this(HibernateUtil.getSessionFactory());
+    }
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public void save(User user) {
 
         Transaction transaction = null;
 
         try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+                     sessionFactory.openSession()) {
 
             transaction = session.beginTransaction();
 
@@ -38,7 +49,7 @@ public class UserDaoImpl implements UserDao {
     public User findById(Long id) {
 
         try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+                     sessionFactory.openSession()) {
 
             return session.get(User.class, id);
 
@@ -51,7 +62,7 @@ public class UserDaoImpl implements UserDao {
     public List<User> findAll() {
 
         try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+                     sessionFactory.openSession()) {
 
             return session.createQuery(
                     "FROM User", User.class
@@ -68,7 +79,7 @@ public class UserDaoImpl implements UserDao {
         Transaction transaction = null;
 
         try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+                     sessionFactory.openSession()) {
 
             transaction = session.beginTransaction();
 
@@ -92,7 +103,7 @@ public class UserDaoImpl implements UserDao {
         Transaction transaction = null;
 
         try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+                     sessionFactory.openSession()) {
 
             transaction = session.beginTransaction();
 
