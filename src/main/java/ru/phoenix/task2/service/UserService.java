@@ -1,65 +1,94 @@
 package ru.phoenix.task2.service;
 
-import ru.phoenix.task2.dao.UserDao;
-import ru.phoenix.task2.dao.UserDaoImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.phoenix.task2.dto.UserRequestDto;
+import ru.phoenix.task2.dto.UserResponseDto;
 import ru.phoenix.task2.entity.User;
+import ru.phoenix.task2.exception.UserNotFoundException;
+import ru.phoenix.task2.repository.UserRepository;
 
 import java.util.List;
 
+@Service
+@Transactional
 public class UserService {
 
-    private final UserDao userDao;
+    private final UserRepository repository;
 
-    public UserService() {
-        this(new UserDaoImpl());
+    public UserService(UserRepository repository) {
+        this.repository = repository;
     }
 
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    public UserResponseDto create(
+            UserRequestDto dto
+    ) {
+
+        User user = new User();
+
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setAge(dto.getAge());
+
+        User saved =
+                repository.save(user);
+
+        return mapToDto(saved);
     }
 
-    public void createUser(String name,
-                           String email,
-                           Integer age) {
+    public UserResponseDto getById(Long id) {
 
-        User user = new User(
-                name,
-                email,
-                age
-        );
+        User user = repository.findById(id)
+                        .orElseThrow(
+                                () -> new UserNotFoundException(id)
+                        );
 
-        userDao.save(user);
+        return mapToDto(user);
     }
 
-    public User getUserById(Long id) {
-        return userDao.findById(id);
+    public List<UserResponseDto> getAll() {
+
+        return repository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
-    public List<User> getAllUsers() {
-        return userDao.findAll();
+    public void delete(Long id) {
+        repository.deleteById(id);
     }
 
-    public void updateUser(Long id,
-                           String name,
-                           String email,
-                           Integer age) {
+    private UserResponseDto mapToDto(
+            User user
+    ) {
 
-        User user = userDao.findById(id);
+        UserResponseDto dto =
+                new UserResponseDto();
 
-        if (user == null) {
-            throw new IllegalArgumentException(
-                    "User not found. ID = " + id
-            );
-        }
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setAge(user.getAge());
+        dto.setCreatedAt(user.getCreatedAt());
 
-        user.setName(name);
-        user.setEmail(email);
-        user.setAge(age);
-
-        userDao.update(user);
+        return dto;
     }
 
-    public void deleteUser(Long id) {
-        userDao.delete(id);
+    public UserResponseDto update(
+            Long id,
+            UserRequestDto dto
+    ) {
+
+        User user = repository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(id));
+
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setAge(dto.getAge());
+
+        User updated = repository.save(user);
+
+        return mapToDto(updated);
     }
 }
