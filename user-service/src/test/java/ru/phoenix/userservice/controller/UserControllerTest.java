@@ -1,4 +1,4 @@
-package ru.phoenix.controller;
+package ru.phoenix.userservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

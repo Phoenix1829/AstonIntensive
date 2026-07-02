@@ -25,13 +25,12 @@ public class EmailService {
 
     public void send(String email, OperationType operation) {
 
-        String text;
-
-        if (operation == OperationType.CREATE) {
-            text = "Здравствуйте! Ваш аккаунт на сайте был успешно создан.";
-        } else {
-            text = "Здравствуйте! Ваш аккаунт был удалён.";
-        }
+        String text = switch (operation) {
+            case CREATE ->
+                    "Здравствуйте! Ваш аккаунт на сайте был успешно создан.";
+            case DELETE ->
+                    "Здравствуйте! Ваш аккаунт был удалён.";
+        };
 
         SimpleMailMessage message = new SimpleMailMessage();
 

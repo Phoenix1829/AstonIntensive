@@ -2,6 +2,7 @@ package ru.phoenix.notificationservice.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import ru.phoenix.notificationservice.event.OperationType;
 
 public class EmailRequestDto {
@@ -10,6 +11,7 @@ public class EmailRequestDto {
     @NotBlank
     private String email;
 
+    @NotNull
     private OperationType operation;
 
     public String getEmail() {
