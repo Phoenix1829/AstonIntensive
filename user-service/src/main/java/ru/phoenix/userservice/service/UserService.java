@@ -5,7 +5,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.phoenix.userservice.dto.UserRequestDto;
 import ru.phoenix.userservice.dto.UserResponseDto;
 import ru.phoenix.userservice.entity.User;
+import ru.phoenix.userservice.event.OperationType;
+import ru.phoenix.userservice.event.UserEvent;
 import ru.phoenix.userservice.exception.UserNotFoundException;
+import ru.phoenix.userservice.kafka.UserEventProducer;
 import ru.phoenix.userservice.repository.UserRepository;
 
 import java.util.List;
@@ -15,9 +18,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository repository;
+    private final UserEventProducer producer;
 
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, UserEventProducer producer) {
         this.repository = repository;
+        this.producer = producer;
     }
 
     public UserResponseDto create(
@@ -32,6 +37,13 @@ public class UserService {
 
         User saved =
                 repository.save(user);
+
+        producer.send(
+                new UserEvent(
+                        OperationType.CREATE,
+                        saved.getEmail()
+                )
+        );
 
         return mapToDto(saved);
     }
@@ -55,7 +67,19 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+
+        User user = repository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(id));
+
+        repository.delete(user);
+
+        producer.send(
+                new UserEvent(
+                        OperationType.DELETE,
+                        user.getEmail()
+                )
+        );
     }
 
     private UserResponseDto mapToDto(
