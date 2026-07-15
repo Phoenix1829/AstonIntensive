@@ -2,6 +2,8 @@ package ru.phoenix.userservice.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.phoenix.userservice.client.NotificationClient;
+import ru.phoenix.userservice.dto.EmailRequestDto;
 import ru.phoenix.userservice.dto.UserRequestDto;
 import ru.phoenix.userservice.dto.UserResponseDto;
 import ru.phoenix.userservice.entity.User;
@@ -19,10 +21,12 @@ public class UserService {
 
     private final UserRepository repository;
     private final UserEventProducer producer;
+    private final NotificationClient notificationClient;
 
-    public UserService(UserRepository repository, UserEventProducer producer) {
+    public UserService(UserRepository repository, UserEventProducer producer, NotificationClient notificationClient) {
         this.repository = repository;
         this.producer = producer;
+        this.notificationClient = notificationClient;
     }
 
     public UserResponseDto create(
@@ -42,6 +46,13 @@ public class UserService {
                 new UserEvent(
                         OperationType.CREATE,
                         saved.getEmail()
+                )
+        );
+
+        notificationClient.sendEmail(
+                new EmailRequestDto(
+                        saved.getEmail(),
+                        OperationType.CREATE
                 )
         );
 
@@ -78,6 +89,13 @@ public class UserService {
                 new UserEvent(
                         OperationType.DELETE,
                         user.getEmail()
+                )
+        );
+
+        notificationClient.sendEmail(
+                new EmailRequestDto(
+                        user.getEmail(),
+                        OperationType.DELETE
                 )
         );
     }
