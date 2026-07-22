@@ -14,7 +14,10 @@ import ru.phoenix.notificationservice.event.OperationType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = NotificationServiceApplication.class)
+@SpringBootTest(classes = NotificationServiceApplication.class,
+        properties = {
+        "spring.kafka.bootstrap-servers=localhost:9092",
+        "spring.mail.username=test@test.com"})
 @TestPropertySource(properties = {
         "spring.mail.username=test@test.com"
 })

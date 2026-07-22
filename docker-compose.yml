@@ -14,7 +14,7 @@ services:
 
       KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
 
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
 
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
@@ -31,3 +31,75 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+
+    ports:
+      - "8761:8761"
+
+    depends_on:
+      - config-server
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+
+    ports:
+      - "8888:8888"
+
+    volumes:
+      - ./config-repo:/config-repo
+
+  gateway-service:
+    build: ./gateway-service
+
+    container_name: gateway-service
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - discovery-service
+      - config-server
+
+  user-service:
+    build: ./user-service
+
+    container_name: user-service
+
+    depends_on:
+      - postgres
+      - kafka
+      - discovery-service
+      - config-server
+
+  notification-service:
+    build: ./notification-service
+
+    container_name: notification-service
+
+    depends_on:
+      - kafka
+      - discovery-service
+      - config-server
+
+volumes:
+  postgres-data:
